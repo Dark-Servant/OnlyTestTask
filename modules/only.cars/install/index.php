@@ -4,6 +4,7 @@ use Bitrix\Main\{
     Loader,
     Config\Option
 };
+use Bitrix\Highloadblock\{HighloadBlockTable, HighloadBlockLangTable};
 use Only\Cars\EventHandles\Employment;
 
 class only_cars extends CModule
@@ -69,7 +70,7 @@ class only_cars extends CModule
          */
         'IBlockTypes' => [
             'ONLY_IB_TYPE_ID' => [
-                'LANG_CODE' => 'ONLY_IB_TYPE_ID'
+                'LANG_CODE' => 'IB_TYPE_ID'
             ]
         ],
 
@@ -93,12 +94,12 @@ class only_cars extends CModule
          */
         'IBlocks' => [
             'ONLY_IBLOCK_CARS' => [
-                'LANG_CODE' => 'ONLY_IBLOCK_CARS',
+                'LANG_CODE' => 'IBLOCK_CARS',
                 'IBLOCK_TYPE_ID' => 'ONLY_IB_TYPE_ID'
             ],
 
             'ONLY_IBLOCK_COMFORT_CATEGORY' => [
-                'LANG_CODE' => 'ONLY_IBLOCK_COMFORT_CATEGORY',
+                'LANG_CODE' => 'IBLOCK_COMFORT_CATEGORY',
                 'IBLOCK_TYPE_ID' => 'ONLY_IB_TYPE_ID'
             ],
         ],
@@ -132,14 +133,14 @@ class only_cars extends CModule
          */
         'IBlockProperties' => [
             'ONLY_IB_CARS_PR_DRIVER' => [
-                'LANG_CODE' => 'ONLY_IB_CARS_PR_DRIVER',
+                'LANG_CODE' => 'IB_CARS_PR_DRIVER',
                 'IBLOCK_ID' => 'ONLY_IBLOCK_CARS',
                 'PROPERTY_TYPE' => 'S',
                 'USER_TYPE' => 'employee'
             ],
 
             'ONLY_IB_CARS_PR_COMFORT_CATEGORY' => [
-                'LANG_CODE' => 'ONLY_IB_CARS_PR_COMFORT_CATEGORY',
+                'LANG_CODE' => 'IB_CARS_PR_COMFORT_CATEGORY',
                 'IBLOCK_ID' => 'ONLY_IBLOCK_CARS',
                 'PROPERTY_TYPE' => 'E',
                 'LINK_IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
@@ -155,7 +156,11 @@ class only_cars extends CModule
          * Получить из опций модуля к данным установленного конкретного highloadblock можно с помощью
          *      Infoservice\<Символьное имя модуля>\Helpers\Options::getHighloadBlock(<константа, чье имя использовалось тут в настройках>)
          */
-        'HighloadBlock' => [],
+        'HighloadBlock' => [
+            'ONLY_HL_USER_POSITION' => [
+                'LANG_CODE' => 'HL_USER_POSITION'
+            ],
+        ],
 
         /**
          * настройки для создания пользовательских полей для чего-угодно. Значения хранят настройки пользовательского
@@ -212,12 +217,39 @@ class only_cars extends CModule
          * равные Y, то при добавлении данных highloadblock через административную часть нельзя будет увидеть
          * добавленные к highloadblock поля
          */
-        'HighloadFields' => [],
+        'HighloadFields' => [
+            'ONLY_HL_UP_NAME' => [
+                'HBLOCK_ID' => 'ONLY_HL_USER_POSITION',
+                'LANG_CODE' => 'HL_UP_NAME',
+                'TYPE' => 'string',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y'
+            ],
+
+            'ONLY_HL_UP_COMFORT_CATEGORY' => [
+                'HBLOCK_ID' => 'ONLY_HL_USER_POSITION',
+                'LANG_CODE' => 'HL_UP_COMFORT_CATEGORY',
+                'TYPE' => 'iblock_element',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y',
+                'MULTIPLE' => 'Y',
+                'SETTINGS' => [
+                    'IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
+                ]
+            ],
+        ],
 
         /**
          * Настройки пользовательских полей для пользователей
          */
-        'UserFields' => [],
+        'UserFields' => [
+            'ONLY_UF_USER_POSITION' => [
+                'LANG_CODE' => 'UF_USER_POSITION',
+                'TYPE' => 'employee',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y'
+            ]
+        ],
     ];
 
     function __construct()

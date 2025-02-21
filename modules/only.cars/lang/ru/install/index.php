@@ -35,3 +35,5 @@ $MESS['INT_FIELD_TITLE'] = 'Числовое поле';
 $MESS['ALLREADY_EXISTS_HL_FIELD_TITLE'] = 'Поле для существующего highload';
 
 require_once __DIR__ . '/iblock.php';
+require_once __DIR__ . '/uf/user.php';
+require_once __DIR__ . '/highload/position.php';
