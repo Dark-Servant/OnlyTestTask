@@ -145,6 +145,79 @@ class only_cars extends CModule
                 'LINK_IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
             ],
         ],
+
+        /**
+         * Настройки для создания HighloadBlock. В значении массив с "ключами"
+         *     NAME - кодовое имя HighloadBlock
+         *     TABLE_NAME - название таблицы
+         * После установки данные каждого highloadblock сохраняются в опциях модуля в группе HighloadBlock как массив, где
+         * "ключ" это значение константы, название которой указанно тут как "ключ", а "значение" это ID highloadblock.
+         * Получить из опций модуля к данным установленного конкретного highloadblock можно с помощью
+         *      Infoservice\<Символьное имя модуля>\Helpers\Options::getHighloadBlock(<константа, чье имя использовалось тут в настройках>)
+         */
+        'HighloadBlock' => [],
+
+        /**
+         * настройки для создания пользовательских полей для чего-угодно. Значения хранят настройки пользовательского
+         * поля. 
+         * ENTITY_ID и FIELD_NAME не указывать. Значение FIELD_NAME должно быть объявлено в include.php как
+         * константа с именем, указанным здесь в каждой группе как "ключ".
+         * В настройках можно указать LANG_CODE, который используется для указания кода языковой опции, где
+         * хранится название пользовательского поля.
+         * Указывать тип надо не в USER_TYPE_ID, в TYPE, это более сокращено. Остальные настройки такие же,
+         * какие надо передавать в Битриксе. Чтобы добавить к модулю настрокий какого-то пользовательского поля
+         * конкретного типа, сначало стоит создать его в административной части, потом с помощью
+         *      Настройки -> Инструменты -> Командная PHP-строка
+         * и метода
+         *      CUserTypeEntity::GetById(<ID созданного пользовательского поля>)
+         * затем выбрать нужные параметры поля, указать тут
+         * 
+         * Если указан тип vote, то важно, чтобы было указано в ['SETTINGS']['CHANNEL_ID'] навазние константы модуля,
+         * в значении которой либо указан идентификатор группы опросов, либо символьное поле, т.е. константа используется
+         * в настройках для VoteChannels, где указаны настройки создаваемой группы опросов.
+         * Если указан тип iblock_element, то важно, чтобы было указано в ['SETTINGS']['IBLOCK_ID'] навазние константы модуля,
+         * в значении которой либо указан идентификатор инфоблока, либо символьное поле, т.е. константа используется
+         * в настройках для IBlocks, где указаны настройки создаваемого инфоблока.
+         * Если указан тип enumeration, то в параметрах можно указать параметр LIST_VALUES как массив, каждый
+         * элемент которого представляет отдельное значения для списка, для каждого значения списка обязательно
+         * должен быть указан LANG_CODE с именем языковой константы, в которой хранится название значения,
+         * указаные элементы списка с одинаковыми значения будут созданы один раз. При наличии LANG_CODE у
+         * пользовательского поля параметр LANG_CODE для значений списка надо писать в ином виде, так как
+         * значение параметра у пользовательского поля будет использоваться как префикс, т.е. языковые константы
+         * для значений списка должны иметь названия, начинающиеся с названия языковой константы у их
+         * пользовательского поля, если такое имеется у него, и знаком подчеркивания после.
+         * Значения для SHOW_FILTER:
+         *      N - не показывать
+         *      I - точное совпадение
+         *      E - маска
+         *      S - подстрока
+         * 
+         * После создания пользовательского поля его ID будет записан в опциях модуля в группе, в которой он был
+         * объявлен, т.е. для IBlockSectionFields ID будет записан в опциях модуля в группе IBlockSectionFields,
+         * в массиве под "ключом" ID.
+         * ID значений пользовательского поля типа "Список" так же будут сохранены в опциях модуля в данных своего
+         * пользовательского поля.
+         * Для получения инфрмации о пользовательском поле из опций модуля надо ипользовать класс модуля и метод,
+         * начинающийся с get и далее название группы опций
+         *      Infoservice\<Символьное имя модуля>\Helpers\Options::get<название группы опций>
+         * например, для IBlockSectionFields
+         *      Infoservice\<Символьное имя модуля>\Helpers\Options::getIBlockSectionFields
+         * 
+         * Настройки пользовательских полей для HighloadBlock. Обязательно указание параметра HBLOCK_ID,
+         * в значении которого указать константу модуля, под которой хранится идентификатор существующего
+         * HighloadBlock или значение, которое используеся в части HighloadBlock для создания модулем своих
+         * highloadblock. Остальные настройки такие же, как указано выше для пользовательских полей
+         * 
+         * ВНИМАНИЕ. Если в настройках полей HighloadBlock не указывать параметры SHOW_IN_LIST и EDIT_IN_LIST,
+         * равные Y, то при добавлении данных highloadblock через административную часть нельзя будет увидеть
+         * добавленные к highloadblock поля
+         */
+        'HighloadFields' => [],
+
+        /**
+         * Настройки пользовательских полей для пользователей
+         */
+        'UserFields' => [],
     ];
 
     function __construct()
@@ -637,6 +710,215 @@ class only_cars extends CModule
     }
 
     /**
+     * Создание значений для пользовательского поля типа "Список"
+     * 
+     * @param int $fieldId - ID пользовательского поля
+     * @param array $fieldValues - значения пользовательского поля
+     * @param string $langCode - префикс к языковым константам для названий значений поля
+     * @return array
+     */
+    protected function addListValues(int $fieldId, array $fieldValues, string $langCode)
+    {
+        $units = [];
+        $values = [];
+        $newN = 0;
+        foreach ($fieldValues as $unit) {
+            $value = Loc::getMessage(($langCode ? $langCode . '_' : '') . $unit['LANG_CODE']);
+            if (empty($value)) continue;
+
+            if (!in_array($value, $values)) {
+                $units['n' . $newN] = ['VALUE' => $value]
+                                    + array_filter($unit, function($key) {
+                                                return !in_array(strtoupper($key), ['LANG_CODE', 'ID']);
+                                            }, ARRAY_FILTER_USE_KEY);
+                ++$newN;
+            }
+
+            $values[$unit['LANG_CODE']] = $value;
+        }
+
+        if (empty($units)) return [];
+
+        (new CUserFieldEnum())->SetEnumValues($fieldId, $units);
+        $ids = [];
+        $savedUnits = CUserFieldEnum::GetList([], ['USER_FIELD_ID' => $fieldId]);
+        while ($saved = $savedUnits->Fetch()) {
+            foreach ($values as $key => $value) {
+                if ($value != $saved['VALUE']) continue;
+
+                $ids['VALUES'][] = intval($saved['ID']);
+                $ids[$key . '_ID'] = intval($saved['ID']);
+            }
+        }
+        return $ids;
+    }
+
+    /**
+     * Добавляет новое пользовательское поле, прежде устанавливая дополнительные свойства поля,
+     * которые не были указаны в переданных данных.
+     * 
+     * @param string $entityId - код поля
+     * @param string $constName - название константы
+     * @param array $fieldData - данные нового поля
+     * @return array
+     * @throws
+     */
+    protected function addUserField(string $entityId, string $constName, array $fieldData) 
+    {
+        global $APPLICATION;
+
+        $fields = [
+                'ENTITY_ID' => $entityId,
+                'FIELD_NAME' => constant($constName),
+                'USER_TYPE_ID' => $fieldData['TYPE']
+            ] + $fieldData + [
+                'USER_TYPE_ID' => 'string',
+                'XML_ID' => '',
+                'SORT' => 500,
+                'MULTIPLE' => 'N',
+                'MANDATORY' => 'N',
+                'SHOW_FILTER' => 'N',
+                'SHOW_IN_LIST' => 'N',
+                'EDIT_IN_LIST' => 'N',
+                'IS_SEARCHABLE' => 'N',
+                'SETTINGS' => []
+            ];
+        if (!preg_match('/^uf_/i', $fields['FIELD_NAME']))
+            throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_NAME', ['NAME' => $constName]));
+
+        if (!empty($fields['LANG_CODE'])) {
+            $langValue = Loc::getMessage($fields['LANG_CODE']);
+            unset($fields['LANG_CODE']);
+            foreach ([
+                        'EDIT_FORM_LABEL', 'LIST_COLUMN_LABEL', 'LIST_FILTER_LABEL',
+                        'ERROR_MESSAGE', 'HELP_MESSAGE'
+                    ] as $labelUnit) {
+
+                $fields[$labelUnit] = ['ru' => $langValue, 'en' => ''];
+            }
+        }
+        if ($fieldData['TYPE'] == 'vote') {
+            if (
+                empty($fields['SETTINGS']['CHANNEL_ID'])
+                || !defined($fields['SETTINGS']['CHANNEL_ID'])
+                || !($channelId = $this->getCategoryIDByValue(constant($fields['SETTINGS']['CHANNEL_ID']), 'VoteChannels'))
+            ) throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_VOTE_CHANNEL', ['NAME' => $constName]));
+            $fields['SETTINGS']['CHANNEL_ID'] = $channelId;
+
+        } elseif (preg_match('/^iblock_(element|section)$/', $fieldData['TYPE'])) {
+            if (
+                empty($fields['SETTINGS']['IBLOCK_ID'])
+                || !defined($fields['SETTINGS']['IBLOCK_ID'])
+                || !($iblockId = $this->getCategoryIDByValue(constant($fields['SETTINGS']['IBLOCK_ID']), 'IBlocks'))
+            ) throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_IBLOCK', ['NAME' => $constName]));
+            $fields['SETTINGS']['IBLOCK_ID'] = $iblockId;
+
+        } elseif (!in_array($fieldData['TYPE'], ['crm'])) {
+            $fields['SETTINGS'] += [
+                'DEFAULT_VALUE' => '',
+                'SIZE' => '20',
+                'ROWS' => '1',
+                'MIN_LENGTH' => '0',
+                'MAX_LENGTH' => '0',
+                'REGEXP' => ''
+            ];
+        }
+
+        $fieldEntity = new CUserTypeEntity();
+        $fieldId = $fieldEntity->Add($fields);
+        if (!$fieldId)
+            throw new Exception(
+                Loc::getMessage('ERROR_USER_FIELD_CREATING', ['NAME' => $constName]) . PHP_EOL .
+                $APPLICATION->GetException()->GetString()
+            );
+        
+        $result = ['ID' => intval($fieldId)];
+        if (($fieldData['TYPE'] == 'enumeration') && !empty($fieldData['LIST_VALUES']))
+            $result += $this->addListValues($result['ID'], $fieldData['LIST_VALUES'], $fieldData['LANG_CODE'] ?: '');
+
+        return $result;
+    }
+
+    /**
+     * Создает нужный highloadblock, если его нет, иначе вызывает исключение.
+     * Возвращает ID созданного highloadblock.
+     * 
+     * @param string $constName - название константы
+     * @param array $optionValue - значение опции
+     * @return void|integer
+     * @throws
+     */
+    protected function initHighloadBlockOptions(string $constName, array $optionValue)
+    {
+        if (!Loader::includeModule('highloadblock')) return;
+
+        $codeName = strtolower(constant($constName));
+        $name = preg_replace_callback(
+            '/(?:^|_)(\w)/',
+            function($part) {
+                return strtoupper($part[1]);
+            },
+            $codeName
+        );
+        $result = HighloadBlockTable::add(
+            [
+                'NAME' => $name,
+                'TABLE_NAME' => preg_replace('/[^a-z\d]+/i', '', $codeName)
+            ]
+        );
+        if (!$result->isSuccess(true))
+            throw new Exception(
+                Loc::getMessage('ERROR_HIGHLOAD_CREATING', ['NAME' => $optionName])
+                . PHP_EOL . implode(PHP_EOL, $result->getErrorMessages())
+            );
+        $hlId = $result->GetId();
+        if (
+            !empty($optionValue['LANG_CODE'])
+            && !empty($title = Loc::getMessage($optionValue['LANG_CODE']))
+        ) HighloadBlockLangTable::add(['ID' => $hlId, 'LID' => LANGUAGE_ID, 'NAME' => $title]);
+
+        return $hlId;
+    }
+
+    /**
+     * Создает пользовательское поле для highloadblock
+     * 
+     * @param string $constName - название константы
+     * @param array $optionValue - значение опции
+     * @return mixed
+     */
+    protected function initHighloadFieldsOptions(string $constName, array $optionValue) 
+    {
+        if (!defined($optionValue['HBLOCK_ID'])) return;
+
+        $hlID = $this->getCategoryIDByValue(constant($optionValue['HBLOCK_ID']), 'HighloadBlock');
+        if (empty($hlID))
+            throw new Exception(Loc::getMessage('ERROR_BAD_HBLOCK_ID', ['#NAME#' => $constName]));
+
+        $entityId = 'HLBLOCK_' . $hlID;
+        return $this->addUserField(
+                            $entityId, $constName,
+                            array_filter(
+                                $optionValue, function($key) {
+                                    return $key != 'HBLOCK_ID';
+                                }, ARRAY_FILTER_USE_KEY
+                            )
+                        );
+    }
+
+    /**
+     * Создание пользовательского поля для пользователей
+     * 
+     * @param string $constName - название константы
+     * @param array $optionValue - значение опции
+     * @return mixed
+     */
+    protected function initUserFieldsOptions(string $constName, array $optionValue)
+    {
+        return $this->addUserField('USER', $constName, $optionValue);
+    }
+    
+    /**
      * Создание всех опций
      *
      * @return  void
@@ -738,6 +1020,73 @@ class only_cars extends CModule
                 $this->moduleClassPath . '/error.php'
             );
         }
+    }
+
+    /**
+     * Удаление пользовательского поля
+     * 
+     * @param string $entityId - код поля
+     * @param string $constName - название константы с символьным кодом поля
+     * @return void
+     */
+    protected function removeUserFields(string $entityId, string $constName) 
+    {
+        $entityField = new CUserTypeEntity();
+        $userFields = CUserTypeEntity::GetList(
+            [], ['ENTITY_ID' => $entityId, 'FIELD_NAME' =>  constant($constName)]
+        );
+        while ($field = $userFields->Fetch()) {
+            $entityField->Delete($field['ID']);
+        }
+    }
+
+    /**
+     * Удаление highloadblock, созданного модулем при установке
+     * 
+     * @param string $constName - название константы
+     * @return void
+     */
+    protected function removeHighloadBlockOptions(string $constName) 
+    {
+        if (!Loader::includeModule('highloadblock')) return;
+
+        $codeName = strtolower(constant($constName));
+        $name = preg_replace_callback(
+            '/(?:^|_)(\w)/',
+            function($part) {
+                return strtoupper($part[1]);
+            },
+            $codeName
+        );
+        $hlUnt = HighloadBlockTable::GetList(['filter' => ['NAME' => $name]])->Fetch();
+        if (!$hlUnt) return;
+
+        HighloadBlockTable::delete($hlUnt['ID']);
+    }
+
+    /**
+     * Удаление пользовательского поля для highloadblock. Метод нужен, только, если
+     * добавляются пользовательские поля для уже существующих highloadblock, так как
+     * поля для создаваемых модулем highloadblock автоматически удалятся вместе с самим
+     * highloadblock
+     * 
+     * @param string $constName - название константы
+     * @return void
+     */
+    protected function removeHighloadFieldsOptions(string $constName)
+    {
+        (new CUserTypeEntity())->Delete($this->getOptionParameter()->getHighloadFields(constant($constName))['ID']);
+    }
+
+    /**
+     * Удаление пользовательского поля для пользователей
+     * 
+     * @param string $constName - название константы
+     * @return void
+     */
+    protected function removeUserFieldsOptions(string $constName) 
+    {
+        $this->removeUserFields('USER', $constName);
     }
 
     /**
