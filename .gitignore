@@ -1,0 +1,8 @@
+/*
+!*.php
+!*.json
+!*.lock
+!.gitignore
+!README.md
+*.txt
+!/modules
