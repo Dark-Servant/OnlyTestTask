@@ -17,3 +17,5 @@ $MESS['ERROR_BAD_PROPERTY_IBLOCK'] = 'Для свойства #PROPERTY# не у
 $MESS['ERROR_IBLOCK_PROPERTY_CREATING'] = 'Не удалось создать свойство инфоблока #PROPERTY#';
 $MESS['ERROR_IBLOCK_PROPERTY_LANG'] = 'Отсутствует параметр LANG_CODE для свойства инфоблока #PROPERTY#';
 $MESS['ERROR_IBLOCK_PROPERTY_EMPTY_LANG'] = 'Значение языковой константы константы LANG_CODE не заполнено для свойства инфоблока #PROPERTY#';
+
+require_once __DIR__ . '/iblock.php';

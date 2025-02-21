@@ -67,7 +67,11 @@ class only_cars extends CModule
          * Настройки для создания типов инфоблока. В "значении" указываются параметры для создания типа инфоблока.
          * Обязательно нужен параметр LANG_CODE с именем языковой константы для названия
          */
-        'IBlockTypes' => [],
+        'IBlockTypes' => [
+            'ONLY_IB_TYPE_ID' => [
+                'LANG_CODE' => 'ONLY_IB_TYPE_ID'
+            ]
+        ],
 
         /**
          * Настройки для создания инфоблоков. В "значении" указываются параметры для создания инфоблоков. Обязательно
@@ -87,7 +91,17 @@ class only_cars extends CModule
          * Права доступа можно указывать и для групп, созданных модулем, просто указав в "ключе" строковый
          * идентификатор константы, используемый в UserGroup
          */
-        'IBlocks' => [],
+        'IBlocks' => [
+            'ONLY_IBLOCK_CARS' => [
+                'LANG_CODE' => 'ONLY_IBLOCK_CARS',
+                'IBLOCK_TYPE_ID' => 'ONLY_IB_TYPE_ID'
+            ],
+
+            'ONLY_IBLOCK_COMFORT_CATEGORY' => [
+                'LANG_CODE' => 'ONLY_IBLOCK_COMFORT_CATEGORY',
+                'IBLOCK_TYPE_ID' => 'ONLY_IB_TYPE_ID'
+            ],
+        ],
 
         /**
          * Настройки для создания свойств инфоблоков. В "ключе" указывается название константы модуля, у которой в
@@ -116,7 +130,21 @@ class only_cars extends CModule
          * из инфоблока с символьным именем some_iblock можно указать some_iblock.STRING_PROPERTY, при установке будет использовано
          * именно STRING_PROPERTY
          */
-        'IBlockProperties' => [],
+        'IBlockProperties' => [
+            'ONLY_IB_CARS_PR_DRIVER' => [
+                'LANG_CODE' => 'ONLY_IB_CARS_PR_DRIVER',
+                'IBLOCK_ID' => 'ONLY_IBLOCK_CARS',
+                'PROPERTY_TYPE' => 'S',
+                'USER_TYPE' => 'employee'
+            ],
+
+            'ONLY_IB_CARS_PR_COMFORT_CATEGORY' => [
+                'LANG_CODE' => 'ONLY_IB_CARS_PR_COMFORT_CATEGORY',
+                'IBLOCK_ID' => 'ONLY_IBLOCK_CARS',
+                'PROPERTY_TYPE' => 'E',
+                'LINK_IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
+            ],
+        ],
     ];
 
     function __construct()
