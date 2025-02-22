@@ -40,4 +40,5 @@ $MESS['ERROR_EMPTY_BX24_MENU_ITEM_TITLE'] = 'Для пункта меню #ITEM#
 require_once __DIR__ . '/iblock.php';
 require_once __DIR__ . '/uf/user.php';
 require_once __DIR__ . '/highload/position.php';
+require_once __DIR__ . '/highload/employment.php';
 require_once __DIR__ . '/leftmenu.php';

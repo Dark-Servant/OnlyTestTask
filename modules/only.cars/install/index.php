@@ -160,6 +160,10 @@ class only_cars extends CModule
             'ONLY_HL_USER_POSITION' => [
                 'LANG_CODE' => 'HL_USER_POSITION'
             ],
+
+            'ONLY_HL_CAR_EMPLOYMENT' => [
+                'LANG_CODE' => 'HL_CAR_EMPLOYMENT'
+            ],
         ],
 
         /**
@@ -236,6 +240,42 @@ class only_cars extends CModule
                 'SETTINGS' => [
                     'IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
                 ]
+            ],
+
+            'ONLY_HL_CE_USER' => [
+                'HBLOCK_ID' => 'ONLY_HL_CAR_EMPLOYMENT',
+                'LANG_CODE' => 'HL_CE_USER',
+                'TYPE' => 'employee',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y'
+            ],
+
+            'ONLY_HL_CE_CAR' => [
+                'HBLOCK_ID' => 'ONLY_HL_CAR_EMPLOYMENT',
+                'LANG_CODE' => 'HL_CE_CAR',
+                'TYPE' => 'iblock_element',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y',
+                'MULTIPLE' => 'Y',
+                'SETTINGS' => [
+                    'IBLOCK_ID' => 'ONLY_IBLOCK_CARS'
+                ]
+            ],
+
+            'ONLY_HL_CE_START_DATETIME' => [
+                'HBLOCK_ID' => 'ONLY_HL_CAR_EMPLOYMENT',
+                'LANG_CODE' => 'HL_CE_START_DATETIME',
+                'TYPE' => 'datetime',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y'
+            ],
+
+            'ONLY_HL_CE_FINISH_DATETIME' => [
+                'HBLOCK_ID' => 'ONLY_HL_CAR_EMPLOYMENT',
+                'LANG_CODE' => 'HL_CE_FINISH_DATETIME',
+                'TYPE' => 'datetime',
+                'SHOW_IN_LIST' => 'Y',
+                'EDIT_IN_LIST' => 'Y'
             ],
         ],
 

@@ -9,5 +9,6 @@ foreach ((require __DIR__ . '/install/version.php') as $key => $value) {
 
 require_once __DIR__ . '/constants/iblock.php';
 require_once __DIR__ . '/constants/highload/position.php';
+require_once __DIR__ . '/constants/highload/employment.php';
 require_once __DIR__ . '/constants/uf/user.php';
 require_once __DIR__ . '/constants/leftmenu.php';
