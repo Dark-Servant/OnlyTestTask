@@ -34,7 +34,10 @@ $MESS['STR_FIELD_TITLE'] = 'Строковое поле';
 $MESS['INT_FIELD_TITLE'] = 'Числовое поле';
 $MESS['ALLREADY_EXISTS_HL_FIELD_TITLE'] = 'Поле для существующего highload';
 $MESS['ERROR_LINK_CREATING'] = 'Не удалось создать символьную ссылку в local для LINK';
+$MESS['ERROR_EMPTY_BX24_MENU_ITEM_ID'] = 'Для одного из пунктов меню в Битрикс24 не указан идентификатор';
+$MESS['ERROR_EMPTY_BX24_MENU_ITEM_TITLE'] = 'Для пункта меню #ITEM# в Битрикс24 не указан заголовок';
 
 require_once __DIR__ . '/iblock.php';
 require_once __DIR__ . '/uf/user.php';
 require_once __DIR__ . '/highload/position.php';
+require_once __DIR__ . '/leftmenu.php';

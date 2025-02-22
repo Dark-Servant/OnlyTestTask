@@ -253,6 +253,15 @@ class only_cars extends CModule
     ];
 
     /**
+     * Настройки для создания новых пунктов меню. Каждое "значение" - массив, в котором указаны параметры
+     *     LANG_CODE - код языковой константы с названием пункта меню
+     *     LINK - ссылка
+     * а "ключ" это константа, объявленная в файле include.php у модуля, в которой записан идентификатор
+     * пункта меню
+     */
+    const BX24_MAIN_LEFT_MENU = [];
+
+    /**
      * Пути к файлам и папкам, что лежат в папке install модуля,  на которые необходимо создать символьные ссылки
      * относительно папки local. Игнорируются файлы из папки www. Символная ссылка будет созданна на последнюю часть
      * указанного пути, по остальным частям будут созданны папки, если их нет. При удалении модуля сивмольная ссылка
@@ -1132,6 +1141,40 @@ class only_cars extends CModule
     }
 
     /**
+     * Добавление новых пунктов меню в левое меню Битрикс24
+     *
+     * @return void
+     */
+    protected function addBX24MenuLinks()
+    {
+        $paramCode = 'left_menu_items_to_all_' . self::getDefaultSiteID();
+        $menuItems = unserialize(Option::get('intranet', $paramCode, false, self::getDefaultSiteID()));
+        if (!is_array($menuItems)) $menuItems = [];
+        $menuItemIds = array_map(function($menuItem) { return $menuItem['ID'] ?? false; }, $menuItems);
+
+        foreach ($this->getModuleConstantValue('BX24_MAIN_LEFT_MENU') as $menuItemId => $menuItem) {
+            if (!defined($menuItemId) || !is_string($menuItemId = trim(constant($menuItemId))))
+                throw new Exception(Loc::getMessage('ERROR_EMPTY_BX24_MENU_ITEM_ID'));
+                
+            if (!$menuItem['LANG_CODE'] || empty($menuTitle = trim(Loc::getMessage($menuItem['LANG_CODE']))))
+                throw new Exception(Loc::getMessage('ERROR_EMPTY_BX24_MENU_ITEM_TITLE', ['#ITEM#' => $menuItemId]));
+
+            if (!$menuItemId || in_array($menuItemId, $menuItemIds)) continue;
+
+            $menuItemIds[] = $menuItemId;
+            $menuItemData = ['ID' => $menuItemId, 'TEXT' => $menuTitle, 'LINK' => '/' . ltrim($menuItem['LINK'] ?: '', '\//')]
+                          + array_filter(
+                                $menuItem,
+                                function($key) { return !in_array($key, ['LANG_CODE']); },
+                                ARRAY_FILTER_USE_KEY
+                            );
+            $this->getOptionParameter()->addBX24MenuLinks($menuItemId, $menuItemData);
+            $menuItems[] = $menuItemData;
+        }
+        Option::set('intranet', $paramCode, serialize($menuItems), self::getDefaultSiteID());
+    }
+
+    /**
      * Выполняется основные операции по установке модуля
      * 
      * @return void
@@ -1140,6 +1183,7 @@ class only_cars extends CModule
     {
         $this->initOptions();
         $this->initFileLinks();
+        $this->addBX24MenuLinks();
     }
 
     /**
@@ -1444,12 +1488,31 @@ class only_cars extends CModule
     }
 
     /**
+     * Удаление созданных пунктов для основного левого меню Битрикс24
+     * 
+     * @return void
+     */
+    protected function removeBX24MenuLinks()
+    {
+        $paramCode = 'left_menu_items_to_all_' . self::getDefaultSiteID();
+        $menuItems = unserialize(Option::get('intranet', $paramCode, false, self::getDefaultSiteID()));
+        if (!is_array($menuItems)) return;
+        $mdlMenuItemIds = array_keys($this->getOptionParameter()->getBX24MenuLinks());
+
+        $menuItems = array_filter($menuItems, function($menuItem) use($mdlMenuItemIds) {
+            return !in_array($menuItem['ID'], $mdlMenuItemIds);
+        });
+        Option::set('intranet', $paramCode, serialize($menuItems), self::getDefaultSiteID());
+    }
+
+    /**
      * Выполняется основные операции по удалению модуля
      * 
      * @return void
      */
     protected function runRemoveMethods()
     {
+        $this->removeBX24MenuLinks();
         $this->removeFileLinks();
         $this->removeOptions();
     }
