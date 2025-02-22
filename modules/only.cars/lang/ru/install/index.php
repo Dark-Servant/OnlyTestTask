@@ -33,6 +33,7 @@ $MESS['HL_TEST_MESSAGES_TITLE'] = 'Тестовый highload';
 $MESS['STR_FIELD_TITLE'] = 'Строковое поле';
 $MESS['INT_FIELD_TITLE'] = 'Числовое поле';
 $MESS['ALLREADY_EXISTS_HL_FIELD_TITLE'] = 'Поле для существующего highload';
+$MESS['ERROR_LINK_CREATING'] = 'Не удалось создать символьную ссылку в local для LINK';
 
 require_once __DIR__ . '/iblock.php';
 require_once __DIR__ . '/uf/user.php';
