@@ -252,6 +252,23 @@ class only_cars extends CModule
         ],
     ];
 
+    // Правила обработки адресов
+    const GROUP_ADDR_RULE = [
+        /**
+         * ЧПУ для новых пунктов меню группы,
+         *  "ключ" - регулярное выражение,
+         *  "значение" - массив с параметрами
+         *      FILE - путь к файлу
+         *      PARAMS - параметры запроса
+         * Для "ключей" "FILE" и "PARAMS" в "значениях" можно вставлять значения констант модуля, указывая их имена, выделенные
+         * кваратными скобками
+         * [infs_..._module_id] - пример, как надо использовать константы (многоточие это какое-то специальное слово модуля),
+         * Так же по-умолчанию доступно [module_id], которое заменяется на идентификатор модуля
+         * 
+         * Сами настройки правил в самом Битриксе надо искать по адресу /bitrix/admin/urlrewrite_list.php
+         */
+    ];
+
     /**
      * Настройки для создания новых пунктов меню. Каждое "значение" - массив, в котором указаны параметры
      *     LANG_CODE - код языковой константы с названием пункта меню
@@ -1141,6 +1158,39 @@ class only_cars extends CModule
     }
 
     /**
+     * Добавление правил обработки адресов
+     *
+     * @return  void
+     */
+    protected function addAddrRules() 
+    {
+        $preparedContants = $this->getPreparedContantsForReplacing();
+        $addrRules = [];
+        foreach ($this->getModuleConstantValue('GROUP_ADDR_RULE') as $rule => $data) {
+            $filter = ['SITE_ID' => self::getDefaultSiteID(), 'CONDITION' => $rule];
+
+            array_walk($data, function(&$value) use($preparedContants) {
+                $value = strtr($value, $preparedContants);
+            });
+            $addrRules[$rule]['data'] = $data;
+            $fields = ['ID' => '', 'PATH' => $data['FILE'], 'RULE' => $data['PARAMS'], 'SORT' => 100];
+            $oldRule = current(CUrlRewriter::GetList($filter, ['SORT' => 'ASC']));
+
+            if (empty($oldRule)) {
+                CUrlRewriter::Add($filter + $fields);
+
+            } else {
+                $addrRules[$rule]['old'] = [
+                    'FILE' => $oldRule['PATH'],
+                    'PARAMS' => $oldRule['RULE'],
+                ];
+                CUrlRewriter::Update($filter, $fields);
+            }
+        }
+        $this->getOptionParameter()->setAddrRules($addrRules);
+    }
+
+    /**
      * Добавление новых пунктов меню в левое меню Битрикс24
      *
      * @return void
@@ -1183,6 +1233,7 @@ class only_cars extends CModule
     {
         $this->initOptions();
         $this->initFileLinks();
+        $this->addAddrRules();
         $this->addBX24MenuLinks();
     }
 
@@ -1506,6 +1557,32 @@ class only_cars extends CModule
     }
 
     /**
+     * Удаление правил обработки адресов
+     * 
+     * @return void
+     */
+    protected function removeAddrRules() 
+    {
+        foreach ($this->getOptionParameter()->getAddrRules() as $rule => $data) {
+            if (empty($data['old'])) {
+                CUrlRewriter::Delete(['SITE_ID' => self::getDefaultSiteID(), 'CONDITION' => $rule]);
+
+            } else {
+                CUrlRewriter::Update([
+                        'SITE_ID' => self::getDefaultSiteID(),
+                        'CONDITION' => $rule
+                    ], [
+                        'ID' => '',
+                        'PATH' => $data['old']['FILE'],
+                        'RULE' => $data['old']['PARAMS'],
+                        'SORT' => 100
+                    ]
+                );
+            }
+        }
+    }
+
+    /**
      * Выполняется основные операции по удалению модуля
      * 
      * @return void
@@ -1513,6 +1590,7 @@ class only_cars extends CModule
     protected function runRemoveMethods()
     {
         $this->removeBX24MenuLinks();
+        $this->removeAddrRules();
         $this->removeFileLinks();
         $this->removeOptions();
     }
