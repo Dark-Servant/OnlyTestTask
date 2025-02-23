@@ -285,9 +285,13 @@ class only_cars extends CModule
         'UserFields' => [
             'ONLY_UF_USER_POSITION' => [
                 'LANG_CODE' => 'UF_USER_POSITION',
-                'TYPE' => 'employee',
+                'TYPE' => 'hlblock',
                 'SHOW_IN_LIST' => 'Y',
-                'EDIT_IN_LIST' => 'Y'
+                'EDIT_IN_LIST' => 'Y',
+                'SETTINGS' => [
+                    'HLBLOCK_ID' => 'ONLY_HL_USER_POSITION',
+                    'HLFIELD_ID' => 'ONLY_HL_UP_NAME'
+                ]
             ]
         ],
     ];
