@@ -307,6 +307,10 @@ class only_cars extends CModule
          * 
          * Сами настройки правил в самом Битриксе надо искать по адресу /bitrix/admin/urlrewrite_list.php
          */
+        '#^/only/testtask/?(?:\?(\S*))?$#' => [
+            'FILE' => '/local/only/testtask/index.php',
+            'PARAMS' => '$1'
+        ]
     ];
 
     /**
@@ -316,7 +320,12 @@ class only_cars extends CModule
      * а "ключ" это константа, объявленная в файле include.php у модуля, в которой записан идентификатор
      * пункта меню
      */
-    const BX24_MAIN_LEFT_MENU = [];
+    const BX24_MAIN_LEFT_MENU = [
+        'ONLY_LINK_TEST_TASK_CODE' => [
+            'LANG_CODE' => 'LINK_TEST_TASK_CODE',
+            'LINK' => 'only/testtask',
+        ]
+    ];
 
     /**
      * Пути к файлам и папкам, что лежат в папке install модуля,  на которые необходимо создать символьные ссылки
@@ -331,7 +340,10 @@ class only_cars extends CModule
      * [infs_..._module_id] - пример, как надо использовать константы (многоточие это какое-то специальное слово модуля),
      * Так же по-умолчанию доступно [module_id], которое заменяется на идентификатор модуля
      */
-    const FILE_LINKS = [];
+    const FILE_LINKS = [
+        'components/[module_id]/carlistbytime',
+        'only/testtask'
+    ];
 
     function __construct()
     {
