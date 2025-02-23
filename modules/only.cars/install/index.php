@@ -936,7 +936,24 @@ class only_cars extends CModule
                 || !defined($fields['SETTINGS']['IBLOCK_ID'])
                 || !($iblockId = $this->getCategoryIDByValue(constant($fields['SETTINGS']['IBLOCK_ID']), 'IBlocks'))
             ) throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_IBLOCK', ['NAME' => $constName]));
+
             $fields['SETTINGS']['IBLOCK_ID'] = $iblockId;
+
+        } elseif ($fieldData['TYPE'] == 'hlblock') {
+            if (
+                empty($fields['SETTINGS']['HLBLOCK_ID'])
+                || !defined($fields['SETTINGS']['HLBLOCK_ID'])
+                || !($hlblockID = $this->getCategoryIDByValue(constant($fields['SETTINGS']['HLBLOCK_ID']), 'HighloadBlock'))
+            ) throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_HLBLOCK', ['NAME' => $constName]));
+
+            if (
+                empty($fields['SETTINGS']['HLFIELD_ID'])
+                || !defined($fields['SETTINGS']['HLFIELD_ID'])
+                || !($hlfieldID = $this->getCategoryIDByValue(constant($fields['SETTINGS']['HLFIELD_ID']), 'HighloadFields'))
+            ) throw new Exception(Loc::getMessage('ERROR_BAD_USER_FIELD_HLFIELD', ['NAME' => $constName]));
+
+            $fields['SETTINGS']['HLBLOCK_ID'] = $hlblockID;
+            $fields['SETTINGS']['HLFIELD_ID'] = $hlfieldID;
 
         } elseif (!in_array($fieldData['TYPE'], ['crm'])) {
             $fields['SETTINGS'] += [
