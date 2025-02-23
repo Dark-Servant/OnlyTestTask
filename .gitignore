@@ -6,3 +6,4 @@
 !README.md
 *.txt
 !/modules
+!/php_interface
