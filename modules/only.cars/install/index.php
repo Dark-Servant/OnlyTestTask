@@ -238,6 +238,7 @@ class only_cars extends CModule
                 'EDIT_IN_LIST' => 'Y',
                 'MULTIPLE' => 'Y',
                 'SETTINGS' => [
+                    'DISPLAY' => 'LIST',
                     'IBLOCK_ID' => 'ONLY_IBLOCK_COMFORT_CATEGORY'
                 ]
             ],
@@ -256,8 +257,8 @@ class only_cars extends CModule
                 'TYPE' => 'iblock_element',
                 'SHOW_IN_LIST' => 'Y',
                 'EDIT_IN_LIST' => 'Y',
-                'MULTIPLE' => 'Y',
                 'SETTINGS' => [
+                    'DISPLAY' => 'LIST',
                     'IBLOCK_ID' => 'ONLY_IBLOCK_CARS'
                 ]
             ],
