@@ -299,7 +299,7 @@ class CarListByTime extends \CBitrixComponent
 
         $users = CUser::GetList($field = 'ID', $direction = 'ASC', ['ID' => implode('|', array_keys($driverModelIDs))]);
         while ($user = $users->Fetch()) {
-            $fullName = implode(' ', array_filter([$user['NAME'], $user['SECOND_NAME'], $user['LAST_NAME']]));
+            $fullName = trim(preg_replace('/[^\wа-я]+/iu', ' ', $user['NAME'] . ' ' . $user['SECOND_NAME'] . ' ' . $user['LAST_NAME']));
             foreach ($driverModelIDs[$user['ID']] as $modelID) {
                 $data[$modelID]['DRIVER'] = $fullName;
             }
